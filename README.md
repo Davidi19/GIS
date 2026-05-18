@@ -37,7 +37,7 @@ This portfolio presents work by **David Sungani**, a GIS Analyst and Earth Scien
 - Spatial Data Digitizing & Atlas/Batch Map Production
 - Field Data Collection & GPS Data Processing
 - Python Scripting & QGIS Automation
-- Land Surveying & Registry Support
+- Registry Support and many more
 
 ---
 ## Contact Information
