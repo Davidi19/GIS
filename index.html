@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>David Sungani — GIS Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f1ec;
+      --surface: #ffffff;
+      --border: #d8d2c8;
+      --accent: #2d6a4f;
+      --accent-light: #d8f3dc;
+      --text: #1a1a1a;
+      --muted: #7a7060;
+      --radius: 8px;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+
+    /* HEADER — sticky */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 48px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .name { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,2.5vw,1.6rem); font-weight: 700; letter-spacing: -0.01em; line-height: 1; }
+    .name span { color: var(--accent); }
+    .tagline { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 5px; }
+    .header-right p { font-size: 0.78rem; color: var(--muted); line-height: 1.7; text-align: right; }
+
+    /* PAGE */
+    .page { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+    .section { padding-top: 52px; }
+    .section-last { padding-bottom: 72px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin-top: 52px; }
+
+    /* SECTION HEADER */
+    .section-header {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 500; }
+    .section-tag {
+      font-family: 'DM Mono', monospace; font-size: 0.61rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); background: var(--accent-light); padding: 3px 9px; border-radius: 100px;
+    }
+    .section-loc {
+      font-family: 'DM Mono', monospace; font-size: 0.61rem; letter-spacing: 0.1em;
+      color: var(--muted); padding: 3px 9px;
+    }
+    .section-count { font-family: 'DM Mono', monospace; font-size: 0.66rem; color: var(--muted); margin-left: auto; }
+
+    /* 2-COL GRID */
+    .two-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; cursor: zoom-in;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.1); transform: translateY(-3px); }
+    .card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #f0ede8; }
+    .card-label { padding: 9px 12px 3px; font-size: 0.76rem; font-weight: 500; color: var(--text); }
+    .card-sub { padding: 0 12px 10px; font-size: 0.68rem; color: var(--muted); }
+
+    /* SLIDESHOW */
+    .slideshow-wrap { max-width: 720px; margin: 0 auto; }
+    .slideshow {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+    .slides-track { position: relative; width: 100%; aspect-ratio: 4/3; overflow: hidden; background: #f0ede8; }
+
+    /* Slides: always in the DOM, transition with opacity + subtle translate */
+    .slide {
+      position: absolute; inset: 0;
+      opacity: 0;
+      transform: translateX(32px);
+      transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1);
+      pointer-events: none;
+    }
+    .slide.active {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: all;
+    }
+    /* outgoing slide exits to the left */
+    .slide.leaving {
+      opacity: 0;
+      transform: translateX(-32px);
+      transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1), transform 0.55s cubic-bezier(0.4,0,0.2,1);
+    }
+    .slide img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; background: #f0ede8; }
+    .slide-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.92); border: 1px solid var(--border); color: var(--text);
+      width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.2s;
+    }
+    .slide-nav:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .slide-nav.prev { left: 10px; }
+    .slide-nav.next { right: 10px; }
+    .slide-counter {
+      position: absolute; top: 10px; right: 12px;
+      font-family: 'DM Mono', monospace; font-size: 0.63rem;
+      background: rgba(255,255,255,0.88); border: 1px solid var(--border);
+      color: var(--muted); padding: 2px 8px; border-radius: 100px; pointer-events: none;
+    }
+    .slide-bar { padding: 10px 16px; border-top: 1px solid var(--border); }
+    .slide-label-text { font-size: 0.78rem; font-weight: 500; color: var(--text); }
+    .dots { display: flex; justify-content: center; gap: 5px; padding: 12px 0 0; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); cursor: pointer; transition: background 0.2s, transform 0.2s; }
+    .dot.active { background: var(--accent); transform: scale(1.4); }
+
+    /* LIGHTBOX */
+    #lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(244,241,236,0.96); backdrop-filter: blur(8px);
+      z-index: 1000; align-items: center; justify-content: center; flex-direction: column; padding: 24px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 90vw; max-height: 82vh; object-fit: contain;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      box-shadow: 0 12px 48px rgba(0,0,0,0.14);
+      cursor: zoom-in; transition: transform 0.3s ease; transform-origin: center center;
+    }
+    #lightbox img.zoomed { transform: scale(2.2); cursor: zoom-out; }
+    #lb-meta { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+    #lb-caption { font-size: 0.85rem; font-weight: 500; }
+    #lb-tag { font-family: 'DM Mono', monospace; font-size: 0.64rem; color: var(--accent); background: var(--accent-light); padding: 3px 9px; border-radius: 100px; }
+    #lightbox-close {
+      position: fixed; top: 18px; right: 22px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.2s;
+    }
+    #lightbox-close:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* FOOTER */
+    footer { background: var(--surface); border-top: 1px solid var(--border); padding: 24px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    footer .services { font-size: 0.75rem; color: var(--muted); line-height: 2; }
+    footer .copy { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--border); }
+
+    @media (max-width: 640px) {
+      header, footer { padding-left: 20px; padding-right: 20px; }
+      .page { padding: 0 20px; }
+      .header-right p { text-align: left; }
+      .two-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="name">David <span>Sungani</span></div>
+    <div class="tagline">GIS Analyst &nbsp;·&nbsp; Remote Sensing &nbsp;·&nbsp; Malawi</div>
+  </div>
+  <div class="header-right">
+    <p>Lilongwe, Malawi</p>
+    <p>GIS & Spatial Analysis &nbsp;·&nbsp; Land Surveying &nbsp;·&nbsp; Data Processing</p>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- ══ 1. GEOLOGICAL MAPPING ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Geological Mapping</div>
+      <div class="section-tag">Geology & Soil</div>
+      <div class="section-loc">Dowa · Nsanje · Kasungu</div>
+      <div class="section-count">4 maps</div>
+    </div>
+    <div class="two-grid">
+      <div class="card" onclick="openLightbox('maps/dowa-geology.png','Dowa — Geology','Geological Mapping')">
+        <img src="maps/dowa-geology.png" alt="Dowa Geology" loading="lazy">
+        <div class="card-label">Dowa — Geology</div>
+        <div class="card-sub">Geological formation mapping</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/nsanje-geological-map.png','Nsanje — Geological Map','Geological Mapping')">
+        <img src="maps/nsanje-geological-map.png" alt="Nsanje Geological Map" loading="lazy">
+        <div class="card-label">Nsanje — Geological Map</div>
+        <div class="card-sub">Geological formation mapping</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/dowa-soil.png','Dowa — Soil Classification','Geological Mapping')">
+        <img src="maps/dowa-soil.png" alt="Dowa Soil" loading="lazy">
+        <div class="card-label">Dowa — Soil Classification</div>
+        <div class="card-sub">Soil type distribution</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/kasungu-soil.png','Kasungu — Soil Classification','Geological Mapping')">
+        <img src="maps/kasungu-soil.png" alt="Kasungu Soil" loading="lazy">
+        <div class="card-label">Kasungu — Soil Classification</div>
+        <div class="card-sub">Soil type distribution</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 2. SHIRE BASIN GEO-HYDROLOGICAL ANALYSIS ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Shire Basin Geo-Hydrological Analysis</div>
+      <div class="section-tag">Hydrology</div>
+      <div class="section-loc">Shire Basin, Malawi</div>
+      <div class="section-count">4 maps</div>
+    </div>
+    <div class="two-grid">
+      <div class="card" onclick="openLightbox('maps/elevation-of-malawi.jpg','Elevation of Malawi','Geo-Hydrological Analysis')">
+        <img src="maps/elevation-of-malawi.jpg" alt="Elevation of Malawi" loading="lazy">
+        <div class="card-label">Elevation of Malawi</div>
+        <div class="card-sub">Digital Elevation Model (DEM)</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/water-malawi.png','Water Resources — Malawi','Geo-Hydrological Analysis')">
+        <img src="maps/water-malawi.png" alt="Water Malawi" loading="lazy">
+        <div class="card-label">Water Resources — Malawi</div>
+        <div class="card-sub">Surface water distribution</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/drainage-analysis.png','Drainage Analysis','Geo-Hydrological Analysis')">
+        <img src="maps/drainage-analysis.png" alt="Drainage Analysis" loading="lazy">
+        <div class="card-label">Drainage Analysis</div>
+        <div class="card-sub">Stream network & watershed delineation</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/southern-east-africa.png','Southern East Africa — Regional Overview','Geo-Hydrological Analysis')">
+        <img src="maps/southern-east-africa.png" alt="Southern East Africa" loading="lazy">
+        <div class="card-label">Southern East Africa</div>
+        <div class="card-sub">Regional hydrological context</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 3. GROUNDWATER POTENTIAL ZONE MAPPING ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Groundwater Potential Zone Mapping</div>
+      <div class="section-tag">Hydrogeology</div>
+      <div class="section-loc">Ntcheu, Malawi</div>
+      <div class="section-count">2 maps</div>
+    </div>
+    <div class="two-grid">
+      <div class="card" onclick="openLightbox('maps/groundwater-exploration.png','Groundwater Potential Zone Mapping','Groundwater Analysis')">
+        <img src="maps/groundwater-exploration.png" alt="Groundwater Exploration" loading="lazy">
+        <div class="card-label">Groundwater Potential Zones</div>
+        <div class="card-sub">Multi-criteria groundwater suitability</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/kasungu.png','Kasungu District Map','Groundwater Analysis')">
+        <img src="maps/kasungu.png" alt="Kasungu" loading="lazy">
+        <div class="card-label">Kasungu District</div>
+        <div class="card-sub">District reference map</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 4. DROUGHT SEVERITY & NDVI ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Drought Severity & Vegetation Analysis</div>
+      <div class="section-tag">Remote Sensing</div>
+      <div class="section-loc">Malawi</div>
+      <div class="section-count">2 maps</div>
+    </div>
+    <div class="two-grid">
+      <div class="card" onclick="openLightbox('maps/drought-severity-analysis.png','Drought Severity Analysis','Remote Sensing')">
+        <img src="maps/drought-severity-analysis.png" alt="Drought Severity" loading="lazy">
+        <div class="card-label">Drought Severity Analysis</div>
+        <div class="card-sub">SPI-based drought classification</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/ndvi.png','NDVI — Vegetation Index','Remote Sensing')">
+        <img src="maps/ndvi.png" alt="NDVI" loading="lazy">
+        <div class="card-label">NDVI — Vegetation Index</div>
+        <div class="card-sub">Normalised Difference Vegetation Index</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 5. MULTI-CRITERIA OVERLAY ANALYSIS ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Multi-Criteria Overlay Analysis</div>
+      <div class="section-tag">GIS Analysis</div>
+      <div class="section-loc">India</div>
+      <div class="section-count">1 map</div>
+    </div>
+    <div class="two-grid">
+      <div class="card" onclick="openLightbox('maps/multi-criteria-decision-analysis.png','Multi-Criteria Decision Analysis','GIS Analysis')">
+        <img src="maps/multi-criteria-decision-analysis.png" alt="Multi-Criteria Decision Analysis" loading="lazy">
+        <div class="card-label">Multi-Criteria Decision Analysis</div>
+        <div class="card-sub">Weighted overlay — site suitability</div>
+      </div>
+      <div class="card" onclick="openLightbox('maps/navigation-map.png','Navigation Map','Cartography')">
+        <img src="maps/navigation-map.png" alt="Navigation Map" loading="lazy">
+        <div class="card-label">Navigation Map</div>
+        <div class="card-sub">Reference & cartographic output</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 6. SLIDESHOW — SWAT (MAKANDE WATERSHED) ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Soil & Water Assessment Tool (SWAT)</div>
+      <div class="section-tag">Watershed Modelling</div>
+      <div class="section-loc">Makande Watershed, Malawi</div>
+      <div class="section-count">13 maps</div>
+    </div>
+    <div class="slideshow-wrap">
+      <div class="slideshow">
+        <div class="slides-track" id="track-swat">
+          <button class="slide-nav prev" onclick="changeSlide('swat',-1)">&#8249;</button>
+          <button class="slide-nav next" onclick="changeSlide('swat', 1)">&#8250;</button>
+          <div class="slide-counter" id="counter-swat">1 / 13</div>
+        </div>
+        <div class="slide-bar"><div class="slide-label-text" id="label-swat">—</div></div>
+      </div>
+      <div class="dots" id="dots-swat"></div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 7. SLIDESHOW — HYDROCLIMATIC ══ -->
+  <section class="section">
+    <div class="section-header">
+      <div class="section-title">Hydroclimatic Analysis</div>
+      <div class="section-tag">Climate & Hydrology</div>
+      <div class="section-loc">Lilongwe, Malawi</div>
+      <div class="section-count">5 maps</div>
+    </div>
+    <div class="slideshow-wrap">
+      <div class="slideshow">
+        <div class="slides-track" id="track-climate">
+          <button class="slide-nav prev" onclick="changeSlide('climate',-1)">&#8249;</button>
+          <button class="slide-nav next" onclick="changeSlide('climate', 1)">&#8250;</button>
+          <div class="slide-counter" id="counter-climate">1 / 5</div>
+        </div>
+        <div class="slide-bar"><div class="slide-label-text" id="label-climate">—</div></div>
+      </div>
+      <div class="dots" id="dots-climate"></div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ══ 8. SLIDESHOW — LULC ══ -->
+  <section class="section section-last">
+    <div class="section-header">
+      <div class="section-title">Land Use / Land Cover Change Detection</div>
+      <div class="section-tag">Change Detection</div>
+      <div class="section-loc">Mzimba TAs, Malawi</div>
+      <div class="section-count">6 maps</div>
+    </div>
+    <div class="slideshow-wrap">
+      <div class="slideshow">
+        <div class="slides-track" id="track-lulc">
+          <button class="slide-nav prev" onclick="changeSlide('lulc',-1)">&#8249;</button>
+          <button class="slide-nav next" onclick="changeSlide('lulc', 1)">&#8250;</button>
+          <div class="slide-counter" id="counter-lulc">1 / 6</div>
+        </div>
+        <div class="slide-bar"><div class="slide-label-text" id="label-lulc">—</div></div>
+      </div>
+      <div class="dots" id="dots-lulc"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button id="lightbox-close" onclick="closeLightbox()">&#10005;</button>
+  <img id="lightbox-img" src="" alt="" onclick="toggleZoom(this)" />
+  <div id="lb-meta">
+    <div id="lb-caption"></div>
+    <div id="lb-tag"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="services">
+    GIS & Spatial Analysis &nbsp;·&nbsp; Remote Sensing & Photogrammetry &nbsp;·&nbsp;
+    Land Parcel Mapping &nbsp;·&nbsp; Spatial Digitizing &nbsp;·&nbsp;
+    Python Scripting &nbsp;·&nbsp; QGIS Automation &nbsp;·&nbsp; Land Surveying & Registry
+  </div>
+  <div class="copy">© 2025 David Sungani</div>
+</footer>
+
+<script>
+  const SLIDESHOWS = {
+    swat: {
+      maps: [
+        { src:"maps/swat/makande-delineated-watershed.png",           label:"Makande — Delineated Watershed" },
+        { src:"maps/swat/ta-chimaliro-study-area.png",           label:"TA Chimaliro — Study Area" },
+        { src:"maps/swat/makande-watershed-slope-map.png",            label:"Makande — Slope Map" },
+        { src:"maps/swat/makande-watershed-soils.png",                label:"Makande — Soils" },
+        { src:"maps/swat/makande-watershed-land-use-map.png",         label:"Makande — Land Use Map" },
+        { src:"maps/swat/makande-watershed-hrus-map.png",             label:"Makande — HRUs Map" },
+        { src:"maps/swat/makande-watershed-average-curve-number.png", label:"Makande — Average Curve Number" },
+        { src:"maps/swat/makande-watershed-sim-streamflow.png",       label:"Makande — Simulated Streamflow" },
+        { src:"maps/swat/makande-watershed-surface-runoff.png",       label:"Makande — Surface Runoff" },
+        { src:"maps/swat/makande-watershed-lateral-flow.png",        label:"Makande — Lateral Flow" },
+        { src:"maps/swat/makande-watershed-percolation.png",          label:"Makande — Percolation" },
+        { src:"maps/swat/makande-watershed-evapotranspiration.png",   label:"Makande — Evapotranspiration" },
+        { src:"maps/swat/makande-watershed-soil-water-content.png",   label:"Makande — Soil Water Content" },
+      ],
+      group: "SWAT — Watershed Modelling"
+    },
+    climate: {
+      maps: [
+        { src:"maps/hydroclimatic/maximum-rainfall.jpg",          label:"Maximum Rainfall" },
+        { src:"maps/hydroclimatic/maximum-temperature.png",       label:"Maximum Temperature" },
+        { src:"maps/hydroclimatic/evapotranspiration.png",        label:"Evapotranspiration" },
+        { src:"maps/hydroclimatic/coefficient-of-variation.png",  label:"Coefficient of Variation" },
+        { src:"maps/hydroclimatic/rainfall-anomaly-index.png",    label:"Rainfall Anomaly Index" },
+      ],
+      group: "Hydroclimatic Analysis"
+    },
+    lulc: {
+      maps: [
+        { src:"maps/lulc/sc-kampingo-sibande.png",   label:"SC Kampingo Sibande" },
+        { src:"maps/lulc/sc-khosolo-gwaza-jere.png", label:"SC Khosolo Gwaza Jere" },
+        { src:"maps/lulc/sc-nyaluwanga.png",         label:"SC Nyaluwanga" },
+        { src:"maps/lulc/ta-mabulabo.png",           label:"TA Mabulabo" },
+        { src:"maps/lulc/ta-mtwalo.png",             label:"TA Mtwalo" },
+        { src:"maps/lulc/ta-mzikubola.png",          label:"TA Mzikubola" },
+      ],
+      group: "LULC Change Detection"
+    }
+  };
+
+  const state = {};
+  Object.keys(SLIDESHOWS).forEach(id => { state[id] = { index: 0, timer: null }; });
+
+  function buildAll() {
+    Object.entries(SLIDESHOWS).forEach(([id, data]) => buildSlideshow(id, data));
+  }
+
+  function buildSlideshow(id, data) {
+    const track = document.getElementById(`track-${id}`);
+    const dotsEl = document.getElementById(`dots-${id}`);
+    const firstBtn = track.querySelector('.slide-nav');
+
+    data.maps.forEach((map, i) => {
+      const slide = document.createElement("div");
+      slide.className = "slide" + (i === 0 ? " active" : "");
+      const img = document.createElement("img");
+      img.src = map.src; img.alt = map.label;
+      img.loading = i === 0 ? "eager" : "lazy";
+      img.onclick = () => openLightbox(map.src, map.label, data.group);
+      slide.appendChild(img);
+      track.insertBefore(slide, firstBtn);
+
+      const dot = document.createElement("div");
+      dot.className = "dot" + (i === 0 ? " active" : "");
+      dot.onclick = () => goToSlide(id, i);
+      dotsEl.appendChild(dot);
+    });
+
+    updateUI(id);
+    resetAuto(id);
+  }
+
+  function goToSlide(id, n, dir) {
+    const maps   = SLIDESHOWS[id].maps;
+    const slides = document.querySelectorAll(`#track-${id} .slide`);
+    const dots   = document.querySelectorAll(`#dots-${id} .dot`);
+    const prev   = state[id].index;
+    const next   = (n + maps.length) % maps.length;
+    if (prev === next) return;
+
+    // direction: 1 = going forward (next enters from right), -1 = backward (next enters from left)
+    const forward = dir !== undefined ? dir > 0 : next > prev;
+
+    // set entering slide start position
+    slides[next].style.transform = forward ? 'translateX(32px)' : 'translateX(-32px)';
+    slides[next].style.opacity   = '0';
+    slides[next].style.transition = 'none';
+
+    // force reflow so the above takes effect before transition kicks in
+    slides[next].getBoundingClientRect();
+
+    // restore transition and activate
+    slides[next].style.transition = '';
+    slides[prev].classList.add('leaving');
+    slides[prev].classList.remove('active');
+    dots[prev]?.classList.remove('active');
+
+    slides[next].classList.add('active');
+    slides[next].style.transform = '';
+    slides[next].style.opacity   = '';
+    dots[next]?.classList.add('active');
+
+    // clean up leaving class after transition ends
+    slides[prev].addEventListener('transitionend', () => {
+      slides[prev].classList.remove('leaving');
+    }, { once: true });
+
+    state[id].index = next;
+    updateUI(id);
+  }
+
+  function changeSlide(id, dir) { goToSlide(id, state[id].index + dir, dir); resetAuto(id); }
+
+  function updateUI(id) {
+    const idx  = state[id].index;
+    const maps = SLIDESHOWS[id].maps;
+    document.getElementById(`counter-${id}`).textContent = `${idx + 1} / ${maps.length}`;
+    document.getElementById(`label-${id}`).textContent   = maps[idx]?.label ?? "—";
+  }
+
+  function resetAuto(id) {
+    clearInterval(state[id].timer);
+    state[id].timer = setInterval(() => changeSlide(id, 1), 5000);
+  }
+
+  function openLightbox(src, label, group) {
+    document.getElementById("lightbox-img").src = src;
+    document.getElementById("lightbox-img").alt = label;
+    document.getElementById("lightbox-img").classList.remove("zoomed");
+    document.getElementById("lb-caption").textContent = label;
+    document.getElementById("lb-tag").textContent = group;
+    document.getElementById("lightbox").classList.add("open");
+  }
+
+  function closeLightbox() { document.getElementById("lightbox").classList.remove("open"); }
+  function toggleZoom(img) { img.classList.toggle("zoomed"); }
+
+  document.getElementById("lightbox").addEventListener("click", function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+
+  buildAll();
+</script>
+</body>
+</html>
