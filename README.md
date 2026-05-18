@@ -2,7 +2,7 @@
 
 A personal GIS portfolio website showcasing spatial analysis projects, watershed modelling, hydroclimatic studies, and land use mapping across Malawi and beyond.
 
-🌐 **Live site:** `https://yourusername.github.io/your-repo-name`
+🌐 **Live site:** `https://Davidi19.github.io/GIS`
 
 ---
 
