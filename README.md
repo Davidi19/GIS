@@ -8,7 +8,7 @@ A personal GIS portfolio website showcasing spatial analysis projects, watershed
 
 ## About
 
-This portfolio presents work by **David Sungani**, a GIS Analyst and Land Surveyor based in Lilongwe, Malawi. It includes maps from freelance and academic projects spanning geological mapping, hydrological analysis, remote sensing, and watershed modelling.
+This portfolio presents work by **David Sungani**, a GIS Analyst and Earth Scientist based in Lilongwe, Malawi. It includes maps from freelance and academic projects spanning geological mapping, hydrological analysis, remote sensing, and watershed modelling.
 
 ---
 
@@ -40,5 +40,9 @@ This portfolio presents work by **David Sungani**, a GIS Analyst and Land Survey
 - Land Surveying & Registry Support
 
 ---
-
-*© 2025 David Sungani · Lilongwe, Malawi*
+## Contact Information
+Phone: 0995717611
+       0885015082
+Email: sunganidavid333@gmail.com
+      
+*© 2026 David Sungani · Lilongwe, Malawi*
